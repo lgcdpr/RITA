@@ -1,0 +1,2982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Opt into system dark mode -->
+    <meta name="color-scheme" content="light dark">
+    <title>RITA 3.0.1 - RCMDO IT Assets</title>
+    <!-- iOS PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Registry">
+
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-main: #000000;
+            --text-sub: #2596be;
+            --accent: #007aff;
+            --success: #34c759;
+            --danger: #ff3b30;
+            --border: #e5e5ea;
+            --modal-overlay: rgba(0, 0, 0, 0.4);
+            color-scheme: light dark;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1c1c1e;
+                --card-bg: #2c2c2e;
+                --text-main: #ffffff;
+                --text-sub: #2596be;
+                --accent: #0a84ff;
+                --success: #30d158;
+                --danger: #ff453a;
+                --border: #38383a;
+                --modal-overlay: rgba(0, 0, 0, 0.6);
+            }
+        }
+
+        body.theme-teal {
+            --bg-color: #0F5A4E;
+            --card-bg: #174F47;
+            --text-main: #ffffff;
+            --text-sub: #2596be;
+            --accent: #2596be;
+            --success: #30d158;
+            --danger: #ff453a;
+            --border: #34776D;
+            --modal-overlay: rgba(0, 0, 0, 0.6);
+            color-scheme: dark;
+        }
+
+        .background-toggle {
+            position: fixed;
+            left: 20px;
+            bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+            z-index: 20;
+            width: 56px;
+            height: 56px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background-color: #0F5A4E;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 120px;
+            padding-top: env(safe-area-inset-top, 20px);
+        }
+
+        header {
+            padding: 20px 16px 10px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+
+        header h1 {
+            font-family: Barlow, Arial, sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        /* Segmented Navigation Tabs */
+        .tab-container {
+            padding: 0 16px 15px 16px;
+            display: flex;
+        }
+
+        .segmented-control {
+            display: flex;
+            background-color: var(--border);
+            border-radius: 9px;
+            padding: 2px;
+            width: 100%;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 7px 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 7px;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats {
+            font-size: 14px;
+            color: var(--text-sub);
+            padding: 0 16px 15px 16px;
+        }
+
+        /* Perfectly Square Grid Layout */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 14px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 700;
+            word-break: break-all;
+            padding-right: 20px;
+            line-height: 1.2;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden; 
+            flex-grow: 1;
+        }
+
+        .card-meta {
+            font-size: 13px;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta.user-highlight span {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .card-meta span {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .card-software-list {
+            margin-top: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow: hidden;
+        }
+
+        .card-software-item {
+            font-size: 12px;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50px;
+            background-color: var(--border);
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            z-index: 2;
+        }
+
+        /* Floating Action Buttons Area */
+        .fab-container {
+            position: fixed;
+            bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+
+        .fab-green {
+            background-color: var(--success);
+        }
+
+        .fab-export {
+            background: #f59e0b;
+        }
+
+        .fab-export:hover {
+            background: #d97706;
+        }
+
+        .fab-blue {
+            background-color: var(--accent);
+        }
+
+        /* Seat Manager Styles */
+        #seatManagerView {
+            display: none;
+            padding: 0 16px;
+        }
+
+        .seat-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .seat-counter {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .seat-counter strong {
+            color: var(--accent);
+            font-size: 18px;
+        }
+
+        .seat-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .seat-message {
+            margin-top: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .seat-message.error { color: var(--danger); }
+        .seat-message.success { color: var(--success); }
+
+        .seat-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+
+        .seat-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 12px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .seat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .seat-comment {
+            font-size: 12px;
+            color: var(--text-sub);
+            word-break: break-word;
+        }
+
+        .seat-remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            padding-left: 10px;
+        }
+
+        /* Sheets & Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-overlay);
+            z-index: 100;
+            align-items: flex-end;
+        }
+
+        .modal-content {
+            background-color: var(--bg-color);
+            width: 100%;
+            max-height: 92%;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 20px 16px calc(24px + env(safe-area-inset-bottom, 0px)) 16px;
+            overflow-y: auto;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+            animation: slideUp 0.25s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .text-btn {
+            color: var(--accent);
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Forms Layout */
+        .form-group {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 4px 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .form-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-sub);
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 16px;
+            padding: 6px 0 8px 0;
+            outline: none;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 48px;
+            font-family: inherit;
+        }
+
+        .form-select {
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-select option {
+            color: #000000;
+            background-color: #ffffff;
+        }
+
+        @media (max-width: 700px) {
+            #seat-software-select, #expenseSoftware {
+                -webkit-appearance: menulist;
+                appearance: auto;
+            }
+        }
+
+        .software-grid-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 4px;
+            margin-bottom: 14px;
+        }
+
+        .software-grid-inputs .form-group {
+            margin-bottom: 0;
+        }
+
+        .software-credentials {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 6px;
+            padding-top: 4px;
+        }
+
+        .software-credentials-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .software-credential-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-top: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 13px;
+            padding: 5px 0;
+            outline: none;
+        }
+
+        textarea.software-credential-input {
+            resize: vertical;
+            min-height: 48px;
+            font-family: inherit;
+        }
+
+        .hardware-grid-inputs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .hardware-grid-inputs .form-group {
+            margin-bottom: 0;
+        }
+
+        .detail-subvalue {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-top: 3px;
+        }
+
+        .detail-item {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+        }
+        .detail-label {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .detail-value {
+            font-size: 16px;
+            font-weight: 400;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+        .detail-value.user-blue {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .detail-software-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .detail-software-row {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px;
+        }
+        .detail-software-row:last-child {
+            border-bottom: none;
+        }
+        .software-num {
+            color: var(--text-sub);
+            font-weight: 600;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+
+        .empty-state {
+            grid-column: span 2;
+            text-align: center;
+            color: var(--text-sub);
+            padding: 60px 20px;
+            font-size: 15px;
+        }
+
+        /* Expenses */
+        #expensesView {
+            display: none;
+            padding: 0 16px;
+        }
+
+        .expenses-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .expenses-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .expenses-subtitle {
+            color: var(--text-sub);
+            font-size: 13px;
+            margin-top: 3px;
+        }
+
+        .expenses-add-btn {
+            flex: 0 0 auto;
+            padding: 9px 12px;
+            white-space: nowrap;
+        }
+
+        .expense-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .expense-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) 45px 85px 95px 105px 26px;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+
+        .expense-item:hover {
+            background-color: rgba(0, 122, 255, 0.03);
+        }
+
+        .expense-item-header {
+            font-size: 10px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .expense-item-value {
+            font-size: 13px;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .expense-item-total {
+            font-weight: 700;
+        }
+
+        .expense-remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .expense-empty {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+            color: var(--text-sub);
+            padding: 45px 20px;
+            font-size: 14px;
+        }
+
+        .software-budget-container {
+            margin: 16px 0 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .software-budget {
+            padding: 14px 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .budget-label-mo {
+            color: #2596be;
+        }
+
+        .budget-value-mo {
+            color: #58c50c;
+        }
+
+        .budget-value-yr {
+            color: #3189eb;
+        }
+
+        @media (max-width: 700px) {
+            .expense-item {
+                grid-template-columns: minmax(0, 1fr) 35px 70px 75px 85px 22px;
+                gap: 5px;
+                padding: 10px 6px;
+            }
+
+            .expense-item-header {
+                font-size: 8px;
+            }
+
+            .expense-item-value {
+                font-size: 11px;
+            }
+
+            .expenses-header {
+                align-items: flex-start;
+            }
+
+            .expenses-add-btn {
+                font-size: 12px;
+                padding: 8px 9px;
+            }
+        }
+
+        /* Splash Screen */
+        #ritaSplash {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+
+        #ritaSplash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #ritaSplash video {
+            display: block;
+            width: min(100vw, 100vh);
+            height: min(100vw, 100vh);
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            background: #000000;
+        }
+    </style>
+</head>
+<body>
+    <div id="ritaSplash" aria-hidden="true">
+        <video id="ritaSplashVideo" autoplay muted playsinline preload="auto">
+            <source src="RCMDO%20intro.mp4" type="video/mp4">
+        </video>
+    </div>
+    <script>
+        window.addEventListener('load', function () {
+            const splash = document.getElementById('ritaSplash');
+            const video = document.getElementById('ritaSplashVideo');
+            if (!splash || !video) return;
+
+            let splashHidden = false;
+            function hideSplash() {
+                if (splashHidden) return;
+                splashHidden = true;
+                splash.classList.add('hidden');
+            }
+
+            /* Play the intro clip and hide the splash when the clip finishes. */
+            video.addEventListener('ended', hideSplash, { once: true });
+            video.currentTime = 0;
+            const playback = video.play();
+
+            /* Fallback for viewers that do not support autoplay. */
+            if (playback && typeof playback.catch === 'function') {
+                playback.catch(function () {
+                    window.setTimeout(hideSplash, 2000);
+                });
+            }
+        });
+    </script>
+
+    <header>
+        <h1>RCMDO IT Assets</h1>
+        <p style="font-size: 14px; color: var(--text-sub); margin-top: 4px;">Hardware &amp; Software Inventory</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="tab-container">
+        <div class="segmented-control">
+            <button class="tab-btn active" id="tabAssets" onclick="switchTab('assets')">Assets</button>
+            <button class="tab-btn" id="tabSeats" onclick="switchTab('seats')">Seat Manager</button>
+            <button class="tab-btn" id="tabExpenses" onclick="switchTab('expenses')">Expenses</button>
+        </div>
+    </div>
+
+    <!-- OVERVIEW DASHBOARD -->
+    <div id="dashboardView">
+        <div style="padding: 0 16px 12px 16px; display: grid; gap: 8px;">
+            <button class="btn-action btn-primary" style="width: 100%;" onclick="openManageComputers()">Manage Computers</button>
+            <button class="btn-action btn-primary" style="width: 100%;" onclick="openManageSoftware()">Manage Software &amp; Seats</button>
+            <button class="btn-action btn-primary" style="width: 100%;" onclick="openManageNames()">Manage Names</button>
+        </div>
+        <div class="stats" id="dbStats">0 Items Saved</div>
+        <div class="grid-container" id="cardsGrid"></div>
+    </div>
+
+    <!-- SEAT MANAGER TAB -->
+    <div id="seatManagerView">
+        <div class="seat-card">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <div class="form-label">Select Software Manager</div>
+                <select id="seat-software-select" class="form-select" style="font-weight: 700; color: var(--accent);" onchange="onSoftwareChange()">
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+
+            <p class="seat-counter">Available Seats: <strong><span id="seats-left">0</span> / <span id="seats-max">0</span></strong></p>
+
+            <div class="form-group">
+                <div class="form-label">User Name</div>
+                <select id="seat-username" class="form-select">
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-label">Computer Name</div>
+                <select id="seat-computer" class="form-select">
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Comments</div>
+                <textarea id="seat-comments" class="form-textarea" placeholder="Optional notes..."></textarea>
+            </div>
+
+            <div class="seat-actions">
+                <button class="btn-action btn-primary" onclick="assignSeat()">Assign License</button>
+                <button class="btn-action btn-danger" onclick="clearAllSeats()">Reset All</button>
+            </div>
+
+            <div id="seat-message" class="seat-message"></div>
+        </div>
+
+        <h3 id="assigned-seats-title" style="font-size: 16px; color: var(--text-sub); margin-bottom: 8px;">Assigned Seats</h3>
+        <div id="assignment-list" class="seat-list"></div>
+    </div>
+
+    <!-- EXPENSES TAB -->
+    <div id="expensesView">
+        <div class="expenses-header">
+            <div>
+                <div class="expenses-title">Software Expenses</div>
+                <div class="expenses-subtitle" id="expensesStats">0 Software Entries</div>
+            </div>
+            <button class="btn-action btn-primary expenses-add-btn" onclick="openExpenseModal()">+ Add Software</button>
+        </div>
+        <div id="expensesList" class="expense-list"></div>
+        <div class="software-budget-container">
+            <div id="softwareBudgetMo" class="software-budget"><span class="budget-label-mo">SOFTWARE BUDGET / MO:</span> <span id="budgetValMo" class="budget-value-mo">$0.00</span></div>
+            <div id="softwareBudget" class="software-budget">SOFTWARE BUDGET / YR: <span id="budgetValYr" class="budget-value-yr">$0.00</span></div>
+        </div>
+    </div>
+
+    <button class="background-toggle" id="backgroundToggle" type="button" onclick="toggleBackgroundColor()" title="Toggle background color">◐</button>
+
+    <!-- Floating Action Buttons -->
+    <div class="fab-container">
+        <button class="fab fab-green" id="sharePointBtn" title="Open SharePoint (long-press to change link)">
+            <svg style="width:24px;height:24px;fill:white;" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 7h4v4H7zm6 0h4v4h-4zm-6 6h4v4H7zm6 0h4v4h-4z"/>
+            </svg>
+        </button>
+        <button class="fab fab-export" title="Export Database" onclick="exportDatabase()">
+            <svg style="width:24px;height:24px;fill:white;" viewBox="0 0 24 24">
+                <path d="M5 20h14v-2H5v2zM12 2l-5 5h3v6h4V7h3l-5-5z"/>
+            </svg>
+        </button>
+        <button class="fab fab-blue" title="Add Item" onclick="openAddModal()">+</button>
+    </div>
+
+    <input type="file" id="restoreFileInput" accept=".json,.rbak,.rba,application/json" style="display:none" onchange="handleRestoreFile(event)">
+
+    <!-- Manage Computers Modal -->
+    <div id="manageComputersModal" class="modal" onclick="closeModalOnOuterClick(event, 'manageComputersModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="text-btn" onclick="closeModal('manageComputersModal')">Cancel</button>
+                <h2>Manage Computers</h2>
+                <button class="text-btn" style="font-weight:700;" onclick="closeModal('manageComputersModal')">Done</button>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Computer No.</div>
+                <input type="text" id="newComputerName" class="form-input" placeholder="Enter a computer name" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();addComputerName();}">
+            </div>
+            <button class="btn-action btn-primary" style="width:100%; margin-bottom:16px;" onclick="addComputerName()">Add</button>
+            <div id="managedComputersList" class="seat-list"></div>
+        </div>
+    </div>
+
+    <!-- Manage Software & Seats Modal -->
+    <div id="manageSoftwareModal" class="modal" onclick="closeModalOnOuterClick(event, 'manageSoftwareModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="text-btn" onclick="closeModal('manageSoftwareModal')">Cancel</button>
+                <h2>Manage Software &amp; Seats</h2>
+                <button class="text-btn" style="font-weight:700;" onclick="closeModal('manageSoftwareModal')">Done</button>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Software Name</div>
+                <input type="text" id="newSoftwareName" class="form-input" placeholder="Enter a software name" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();addSoftwareOption();}">
+            </div>
+            <div class="form-group">
+                <div class="form-label">Total Available Seats</div>
+                <input type="number" id="newSoftwareSeats" class="form-input" min="0" step="1" inputmode="numeric" placeholder="Enter total available seats" onkeydown="if(event.key==='Enter'){event.preventDefault();addSoftwareOption();}">
+            </div>
+            <button class="btn-action btn-primary" style="width:100%; margin-bottom:16px;" onclick="addSoftwareOption()">Add</button>
+            <div id="managedSoftwareList" class="seat-list"></div>
+        </div>
+    </div>
+
+    <!-- Manage Names Modal -->
+    <div id="manageNamesModal" class="modal" onclick="closeModalOnOuterClick(event, 'manageNamesModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="text-btn" onclick="closeModal('manageNamesModal')">Cancel</button>
+                <h2>Manage Names</h2>
+                <button class="text-btn" style="font-weight:700;" onclick="closeModal('manageNamesModal')">Done</button>
+            </div>
+            <div class="form-group">
+                <div class="form-label">Employee Name</div>
+                <input type="text" id="newEmployeeName" class="form-input" placeholder="Enter a name" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();addEmployeeName();}">
+            </div>
+            <button class="btn-action btn-primary" style="width:100%; margin-bottom:16px;" onclick="addEmployeeName()">Add</button>
+            <div id="managedNamesList" class="seat-list"></div>
+        </div>
+    </div>
+
+    <!-- Form Modal -->
+    <div id="formModal" class="modal" onclick="closeModalOnOuterClick(event, 'formModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="text-btn" onclick="closeModal('formModal')">Cancel</button>
+                <h2 id="formModalTitle">New Entry</h2>
+                <button class="text-btn" style="font-weight:700;" onclick="saveRecordForm()">Save</button>
+            </div>
+            <input type="hidden" id="editingId">
+            
+            <div class="form-group">
+                <div class="form-label">Computer No.</div>
+                <select id="inputCompNo" class="form-select">
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-label">User</div>
+                <select id="inputUser" class="form-select">
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Email</div>
+                <input type="email" id="inputEmail" class="form-input" placeholder="e.g. alex@company.com">
+            </div>
+
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-sub); font-weight: 600; margin: 15px 0 5px 2px;">Software Provisions</div>
+            <div class="software-grid-inputs">
+                <div class="form-group">
+                    <div class="form-label">Software 1</div>
+                    <input type="text" id="sw1" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw1User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw1Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw1Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 2</div>
+                    <input type="text" id="sw2" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw2User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw2Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw2Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 3</div>
+                    <input type="text" id="sw3" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw3User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw3Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw3Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 4</div>
+                    <input type="text" id="sw4" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw4User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw4Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw4Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 5</div>
+                    <input type="text" id="sw5" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw5User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw5Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw5Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 6</div>
+                    <input type="text" id="sw6" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw6User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw6Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw6Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 7</div>
+                    <input type="text" id="sw7" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw7User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw7Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw7Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 8</div>
+                    <input type="text" id="sw8" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw8User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw8Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw8Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 9</div>
+                    <input type="text" id="sw9" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw9User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw9Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw9Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Software 10</div>
+                    <input type="text" id="sw10" class="form-input">
+                    <div class="software-credentials">
+                        <div class="software-credentials-row">
+                            <input type="text" id="sw10User" class="software-credential-input" placeholder="User">
+                            <input type="password" id="sw10Pass" class="software-credential-input" placeholder="Password">
+                        </div>
+                        <textarea id="sw10Comments" class="software-credential-input" placeholder="Comments" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-sub); font-weight: 600; margin: 15px 0 5px 2px;">Hardware</div>
+            <div class="hardware-grid-inputs">
+                <div class="form-group"><div class="form-label">CPU</div><input type="text" id="inputCPU" class="form-input" placeholder="e.g. Apple M1 Max"></div>
+                <div class="form-group"><div class="form-label">RAM</div><input type="text" id="inputRAM" class="form-input" placeholder="e.g. 64 GB"></div>
+                <div class="form-group"><div class="form-label">GPU</div><input type="text" id="inputGPU" class="form-input" placeholder="e.g. 24-core GPU"></div>
+                <div class="form-group"><div class="form-label">Storage</div><input type="text" id="inputStorage" class="form-input" placeholder="e.g. 2 TB"></div>
+                <div class="form-group"><div class="form-label">Displays</div><input type="text" id="inputDisplays" class="form-input" placeholder="e.g. 2 × 32&quot;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Software Expense Form Modal -->
+    <div id="expenseModal" class="modal" onclick="closeModalOnOuterClick(event, 'expenseModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="text-btn" onclick="closeModal('expenseModal')">Cancel</button>
+                <h2 id="expenseModalTitle">New Software Expense</h2>
+                <button class="text-btn" style="font-weight:700;" onclick="saveExpenseForm()">Save</button>
+            </div>
+            <input type="hidden" id="editingExpenseId">
+
+            <div class="form-group">
+                <div class="form-label">Software</div>
+                <select id="expenseSoftware" class="form-select" style="font-weight: 700; color: var(--accent);" onchange="onExpenseSoftwareChange()">
+                    <!-- Options populated dynamically -->
+                </select>
+            </div>
+
+            <div class="software-grid-inputs">
+                <div class="form-group">
+                    <div class="form-label">Quantity</div>
+                    <input type="number" id="expenseQuantity" class="form-input" min="0" step="1" inputmode="numeric" placeholder="e.g. 7">
+                </div>
+                <div class="form-group">
+                    <div class="form-label">Cost per seat</div>
+                    <input type="number" id="expenseCostPerSeat" class="form-input" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 3000.00">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Grand Total Per Software Suite / Yr</div>
+                <input type="number" id="expenseGrandTotal" class="form-input" min="0" step="0.01" inputmode="decimal" placeholder="Calculated automatically">
+            </div>
+
+            <div class="form-group">
+                <div class="form-label">Grand Total Per Software Suite / Mo</div>
+                <input type="number" id="expenseGrandTotalMo" class="form-input" min="0" step="0.01" inputmode="decimal" placeholder="Calculated automatically" readonly style="opacity: 0.8;">
+            </div>
+
+            <div id="expense-message" class="seat-message"></div>
+        </div>
+    </div>
+
+    <!-- Detail Modal for Assets -->
+    <div id="detailModal" class="modal" onclick="closeModalOnOuterClick(event, 'detailModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="text-btn" onclick="closeModal('detailModal')">Close</button>
+                <h2>Asset Details</h2>
+                <button class="text-btn" style="font-weight:700;" id="detailEditBtn">Edit</button>
+            </div>
+            <div id="detailContainer"></div>
+        </div>
+    </div>
+
+    <!-- Expense Detail Modal -->
+    <div id="expenseDetailModal" class="modal" onclick="closeModalOnOuterClick(event, 'expenseDetailModal')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="text-btn" onclick="closeModal('expenseDetailModal')">Close</button>
+                <h2>Software Expense Details</h2>
+                <button class="text-btn" style="font-weight:700;" id="expenseDetailEditBtn">Edit</button>
+            </div>
+            <div id="expenseDetailContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let employeeNames = [];
+        
+        let computerNames = [];
+        let softwareCatalog = [];
+
+        const STORAGE_KEY = 'pwa_asset_db';
+        const BACKUP_KEY = 'pwa_asset_db_backup';
+        const MASTER_KEY_CHECK = 'pwa_rita_master_check';
+        const CRYPTO_VERSION = 1;
+        const PBKDF2_ITERATIONS = 250000;
+
+        let selectedSoftwareId = '';
+        let database = [];
+        let expenses = [];
+        let encryptionKey = null;
+
+        function normalizeSoftwareCatalog(records) {
+            if (!Array.isArray(records)) return [];
+            const seen = new Set();
+            return records.map(item => {
+                const name = String(item?.name || '').trim();
+                const maxSeats = Number(item?.maxSeats);
+                if (!name || !Number.isInteger(maxSeats) || maxSeats < 0) return null;
+                const id = String(item?.id || createSoftwareId(name));
+                const key = name.toLocaleLowerCase();
+                if (seen.has(key)) return null;
+                seen.add(key);
+                return { id, name, maxSeats };
+            }).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name));
+        }
+
+        function createSoftwareId(name) {
+            const slug = String(name).toLocaleLowerCase().normalize('NFKD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'software';
+            return 'software_' + slug;
+        }
+
+        function normalizeExpenses(records) {
+            if (!Array.isArray(records)) return [];
+            return records.map(record => ({
+                id: String(record?.id || Date.now().toString() + Math.random().toString(36).slice(2)),
+                software: String(record?.software || ''),
+                quantity: Number(record?.quantity) || 0,
+                costPerSeat: Number(record?.costPerSeat) || 0,
+                grandTotal: Number(record?.grandTotal) || 0
+            })).filter(record => record.software);
+        }
+
+        function normalizeDatabase(records) {
+            if (!Array.isArray(records)) return [];
+            return records.map(record => ({
+                ...record,
+                software: Array.isArray(record.software)
+                    ? record.software.map(sw => typeof sw === 'string'
+                        ? { name: sw, user: '', password: '', comments: '' }
+                        : {
+                            name: sw?.name || '',
+                            user: sw?.user || '',
+                            password: sw?.password || '',
+                            comments: sw?.comments || ''
+                        })
+                    : []
+            }));
+        }
+
+        function isValidDatabase(data) {
+            return Array.isArray(data) && data.every(record =>
+                record && typeof record === 'object' &&
+                typeof record.id !== 'undefined' &&
+                typeof record.compNo === 'string' &&
+                Array.isArray(record.software)
+            );
+        }
+
+        function isStorageAvailable() {
+            try {
+                const key = '__rita_storage_test__';
+                localStorage.setItem(key, '1');
+                localStorage.removeItem(key);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function bytesToBase64(bytes) {
+            let binary = '';
+            const chunk = 0x8000;
+            for (let i = 0; i < bytes.length; i += chunk) {
+                binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+            }
+            return btoa(binary);
+        }
+
+        function base64ToBytes(base64) {
+            const binary = atob(base64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes;
+        }
+
+        async function deriveEncryptionKey(masterPassword, saltBytes) {
+            const material = await crypto.subtle.importKey(
+                'raw',
+                new TextEncoder().encode(masterPassword),
+                'PBKDF2',
+                false,
+                ['deriveKey']
+            );
+
+            return crypto.subtle.deriveKey(
+                {
+                    name: 'PBKDF2',
+                    salt: saltBytes,
+                    iterations: PBKDF2_ITERATIONS,
+                    hash: 'SHA-256'
+                },
+                material,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+        }
+
+        async function encryptObject(object, key, saltBytes = crypto.getRandomValues(new Uint8Array(16))) {
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const ciphertext = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv },
+                key,
+                new TextEncoder().encode(JSON.stringify(object))
+            );
+
+            return {
+                type: 'RITA_ENCRYPTED_BACKUP',
+                version: CRYPTO_VERSION,
+                algorithm: 'AES-GCM',
+                kdf: 'PBKDF2-SHA-256',
+                iterations: PBKDF2_ITERATIONS,
+                salt: bytesToBase64(saltBytes),
+                iv: bytesToBase64(iv),
+                data: bytesToBase64(new Uint8Array(ciphertext))
+            };
+        }
+
+        async function decryptObject(envelope, key) {
+            if (!envelope || envelope.version !== CRYPTO_VERSION ||
+                envelope.algorithm !== 'AES-GCM' || !envelope.salt ||
+                !envelope.iv || !envelope.data) {
+                throw new Error('Invalid RITA encrypted data.');
+            }
+
+            const plaintext = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: base64ToBytes(envelope.iv) },
+                key,
+                base64ToBytes(envelope.data)
+            );
+
+            return JSON.parse(new TextDecoder().decode(plaintext));
+        }
+
+        async function setMasterPassword(masterPassword) {
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            encryptionKey = await deriveEncryptionKey(masterPassword, salt);
+            const check = await encryptObject({ rita: 'RITA_MASTER_PASSWORD_OK' }, encryptionKey, salt);
+            localStorage.setItem(MASTER_KEY_CHECK, JSON.stringify(check));
+        }
+
+        async function promptForNewMasterPassword() {
+            while (true) {
+                const password = prompt(
+                    'Create your RITA Master Password.\n\n' +
+                    'This password protects the database and software passwords stored by RITA.\n\n' +
+                    'IMPORTANT: If you forget it, RITA cannot decrypt protected data.'
+                );
+                if (password === null) return false;
+
+                if (password.length < 8) {
+                    alert('Please use a master password with at least 8 characters.');
+                    continue;
+                }
+
+                const confirmation = prompt('Confirm your RITA Master Password:');
+                if (confirmation === null) return false;
+
+                if (password !== confirmation) {
+                    alert('The master passwords do not match. Please try again.');
+                    continue;
+                }
+
+                await setMasterPassword(password);
+                return true;
+            }
+        }
+
+        async function unlockRITA() {
+            const rawCheck = localStorage.getItem(MASTER_KEY_CHECK);
+            if (!rawCheck) return false;
+
+            try {
+                const check = JSON.parse(rawCheck);
+                const password = prompt('Enter your RITA Master Password:');
+                if (password === null) return false;
+
+                const key = await deriveEncryptionKey(password, base64ToBytes(check.salt));
+                await decryptObject(check, key);
+                encryptionKey = key;
+                return true;
+            } catch (error) {
+                alert('Incorrect RITA Master Password.');
+                return false;
+            }
+        }
+
+        function getAllSeatAssignmentsSafe() {
+            try {
+                const raw = localStorage.getItem('multiLicenseAssignments');
+                const parsed = raw ? JSON.parse(raw) : {};
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch {
+                return {};
+            }
+        }
+
+        function isEncryptedEnvelope(raw) {
+            try {
+                const parsed = JSON.parse(raw);
+                return parsed && parsed.type === 'RITA_ENCRYPTED_BACKUP' &&
+                    parsed.version === CRYPTO_VERSION &&
+                    parsed.algorithm === 'AES-GCM' &&
+                    parsed.kdf === 'PBKDF2-SHA-256';
+            } catch {
+                return false;
+            }
+        }
+
+        async function saveEncryptedState() {
+            if (!encryptionKey) throw new Error('RITA is locked.');
+
+            const state = {
+                database: normalizeDatabase(database),
+                seatAssignments: getAllSeatAssignmentsSafe(),
+                expenses: normalizeExpenses(expenses),
+                employeeNames: [...employeeNames],
+                computerNames: [...computerNames],
+                softwareCatalog: softwareCatalog.map(sw => ({ ...sw }))
+            };
+
+            const encrypted = await encryptObject(state, encryptionKey);
+            const previous = localStorage.getItem(STORAGE_KEY);
+
+            if (previous && isEncryptedEnvelope(previous)) {
+                localStorage.setItem(BACKUP_KEY, previous);
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(encrypted));
+        }
+
+        async function saveToStorage() {
+            try {
+                if (!isStorageAvailable()) throw new Error('Storage unavailable.');
+                await saveEncryptedState();
+                renderDashboard();
+                renderExpenses();
+                populateAssetUserDropdown(document.getElementById('inputUser')?.value || '');
+                populateSeatUserDropdown();
+                return true;
+            } catch (error) {
+                console.error(error);
+                alert(
+                    'RITA Storage Warning\n\n' +
+                    'RITA could not save the database.\n\n' +
+                    'Your current changes remain in memory. Please make a manual encrypted backup if possible and check device/browser storage.'
+                );
+                return false;
+            }
+        }
+
+        async function loadState() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return { exists: false, valid: true, state: { database: [], seatAssignments: {}, expenses: [], employeeNames: [], computerNames: [], softwareCatalog: [] } };
+
+            try {
+                const state = await decryptObject(JSON.parse(raw), encryptionKey);
+                if (!state || !isValidDatabase(state.database)) throw new Error('Invalid database structure.');
+                return { exists: true, valid: true, state };
+            } catch (error) {
+                console.error(error);
+                return { exists: true, valid: false, state: null };
+            }
+        }
+
+        async function recoverInternalBackup() {
+            const raw = localStorage.getItem(BACKUP_KEY);
+            if (!raw) return false;
+
+            try {
+                const state = await decryptObject(JSON.parse(raw), encryptionKey);
+                if (!state || !isValidDatabase(state.database)) return false;
+
+                database = normalizeDatabase(state.database);
+                expenses = normalizeExpenses(state.expenses || []);
+                employeeNames = Array.isArray(state.employeeNames)
+                    ? state.employeeNames.filter(name => typeof name === 'string').map(name => name.trim()).filter(Boolean)
+                    : [];
+                computerNames = Array.isArray(state.computerNames)
+                    ? state.computerNames.filter(name => typeof name === 'string').map(name => name.trim()).filter(Boolean)
+                    : [];
+                softwareCatalog = normalizeSoftwareCatalog(state.softwareCatalog || []);
+                localStorage.setItem(STORAGE_KEY, raw);
+
+                if (state.seatAssignments) {
+                    localStorage.setItem('multiLicenseAssignments', JSON.stringify(state.seatAssignments));
+                }
+                return true;
+            } catch (error) {
+                console.error(error);
+                return false;
+            }
+        }
+
+        function showDatabaseRecoveryDialog() {
+            return new Promise(resolve => {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position:fixed; inset:0; z-index:99999; background:rgba(0,0,0,.45);
+                    display:flex; align-items:center; justify-content:center; padding:20px;
+                `;
+
+                const box = document.createElement('div');
+                box.style.cssText = `
+                    width:min(420px,100%); background:#fff; border-radius:16px; padding:22px;
+                    box-shadow:0 15px 45px rgba(0,0,0,.25); font-family:Helvetica,Arial,sans-serif;
+                `;
+
+                box.innerHTML = `
+                    <div style="font-size:20px;font-weight:700;margin-bottom:12px;">RITA Database Warning</div>
+                    <div style="font-size:15px;line-height:1.5;margin-bottom:8px;">The saved database could not be read.</div>
+                    <div style="font-size:15px;line-height:1.5;margin-bottom:20px;">Your existing data has not been overwritten.</div>
+                    <div style="display:grid;gap:9px;">
+                        <button data-action="recover" style="padding:12px;border:0;border-radius:10px;background:#007aff;color:white;font-weight:700;">Try Recovery</button>
+                        <button data-action="restore" style="padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;font-weight:700;">Restore Backup</button>
+                        <button data-action="empty" style="padding:12px;border:1px solid #ccc;border-radius:10px;background:#fff;font-weight:700;">Start Empty Database</button>
+                        <button data-action="cancel" style="padding:12px;border:0;border-radius:10px;background:#eee;font-weight:700;">Cancel</button>
+                    </div>
+                `;
+
+                overlay.appendChild(box);
+                document.body.appendChild(overlay);
+
+                box.querySelectorAll('button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const action = button.dataset.action;
+                        overlay.remove();
+                        resolve(action);
+                    });
+                });
+            });
+        }
+
+        async function initializeRITA() {
+            if (!isStorageAvailable()) {
+                alert(
+                    'RITA Storage Warning\n\n' +
+                    'Browser storage is unavailable. RITA cannot safely load or save its database in this environment.'
+                );
+                return;
+            }
+
+            const oldRaw = localStorage.getItem(STORAGE_KEY);
+            const hasMasterPassword = !!localStorage.getItem(MASTER_KEY_CHECK);
+
+            if (!hasMasterPassword) {
+                let oldDatabase = [];
+
+                if (oldRaw) {
+                    try {
+                        const parsed = JSON.parse(oldRaw);
+                        if (isValidDatabase(parsed)) oldDatabase = normalizeDatabase(parsed);
+                    } catch (error) {
+                        console.warn('Existing RITA data could not be parsed during migration.', error);
+                    }
+                }
+
+                if (!(await promptForNewMasterPassword())) return;
+
+                database = oldDatabase;
+                expenses = [];
+
+                try {
+                    await saveEncryptedState();
+                } catch (error) {
+                    console.error(error);
+                    alert(
+                        'RITA could not complete the secure migration.\n\n' +
+                        'Your original data has not been intentionally overwritten.'
+                    );
+                    return;
+                }
+            } else {
+                if (!(await unlockRITA())) return;
+
+                const result = await loadState();
+
+                if (!result.valid) {
+                    const choice = await showDatabaseRecoveryDialog();
+
+                    if (choice === 'recover') {
+                        if (!(await recoverInternalBackup())) {
+                            alert('Automatic recovery was not successful. Your existing data has not been overwritten.');
+                            return;
+                        }
+                    } else if (choice === 'restore') {
+                        openRestorePicker();
+                        return;
+                    } else if (choice === 'empty') {
+                        database = [];
+                    } else {
+                        return;
+                    }
+                } else {
+                    database = normalizeDatabase(result.state.database);
+                    expenses = normalizeExpenses(result.state.expenses || []);
+                    employeeNames = Array.isArray(result.state.employeeNames)
+                        ? result.state.employeeNames.filter(name => typeof name === 'string').map(name => name.trim()).filter(Boolean)
+                        : [];
+                    computerNames = Array.isArray(result.state.computerNames)
+                        ? result.state.computerNames.filter(name => typeof name === 'string').map(name => name.trim()).filter(Boolean)
+                        : [];
+                    softwareCatalog = normalizeSoftwareCatalog(result.state.softwareCatalog || []);
+                    if (result.state.seatAssignments) {
+                        try {
+                            localStorage.setItem(
+                                'multiLicenseAssignments',
+                                JSON.stringify(result.state.seatAssignments)
+                            );
+                        } catch (error) {
+                            console.warn(error);
+                        }
+                    }
+                }
+            }
+
+            renderDashboard();
+            renderExpenses();
+            initSoftwareDropdown();
+            syncExpenseSoftwareDropdown();
+            updateSeatUI();
+            await loadSharePointLink();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeRITA();
+
+            document.getElementById('expenseQuantity').addEventListener('input', updateExpenseGrandTotal);
+            document.getElementById('expenseCostPerSeat').addEventListener('input', updateExpenseGrandTotal);
+            document.getElementById('expenseGrandTotal').addEventListener('input', updateExpenseMonthlyFromYearly);
+        });
+
+        function openManageNames() {
+            renderManagedNames();
+            document.getElementById('newEmployeeName').value = '';
+            document.getElementById('manageNamesModal').style.display = 'flex';
+        }
+
+        function renderManagedNames() {
+            const list = document.getElementById('managedNamesList');
+            list.innerHTML = '';
+            if (!employeeNames.length) {
+                list.innerHTML = '<li class="seat-list-item" style="color:var(--text-sub);">No names yet. Add an employee name above.</li>';
+                return;
+            }
+            employeeNames.forEach((name, index) => {
+                const item = document.createElement('li');
+                item.className = 'seat-list-item';
+                const label = document.createElement('span');
+                label.textContent = name;
+                label.style.wordBreak = 'break-word';
+                const remove = document.createElement('button');
+                remove.className = 'seat-remove-btn';
+                remove.type = 'button';
+                remove.textContent = '✕';
+                remove.setAttribute('aria-label', 'Remove ' + name);
+                remove.onclick = () => removeEmployeeName(index);
+                item.appendChild(label);
+                item.appendChild(remove);
+                list.appendChild(item);
+            });
+        }
+
+        async function addEmployeeName() {
+            const input = document.getElementById('newEmployeeName');
+            const name = input.value.trim();
+            if (!name) {
+                input.focus();
+                return;
+            }
+            if (employeeNames.some(existing => existing.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+                alert('That name is already in the list.');
+                input.select();
+                return;
+            }
+            employeeNames.push(name);
+            employeeNames.sort((a, b) => a.localeCompare(b));
+            input.value = '';
+            renderManagedNames();
+            populateAssetUserDropdown();
+            populateSeatUserDropdown();
+            await saveToStorage();
+            input.focus();
+        }
+
+        async function removeEmployeeName(index) {
+            const name = employeeNames[index];
+            if (!name || !confirm('Remove "' + name + '" from the name list? Existing records and seat assignments will not be changed.')) return;
+            employeeNames.splice(index, 1);
+            renderManagedNames();
+            populateAssetUserDropdown();
+            populateSeatUserDropdown();
+            await saveToStorage();
+        }
+
+        function openManageComputers() {
+            renderManagedComputers();
+            document.getElementById('newComputerName').value = '';
+            document.getElementById('manageComputersModal').style.display = 'flex';
+        }
+
+        function renderManagedComputers() {
+            const list = document.getElementById('managedComputersList');
+            list.innerHTML = '';
+            if (!computerNames.length) {
+                list.innerHTML = '<li class="seat-list-item" style="color:var(--text-sub);">No computer names yet. Add a computer name above.</li>';
+                return;
+            }
+            computerNames.forEach((name, index) => {
+                const item = document.createElement('div');
+                item.className = 'seat-list-item';
+                const label = document.createElement('span');
+                label.className = 'seat-info';
+                label.textContent = name;
+                const remove = document.createElement('button');
+                remove.className = 'seat-remove-btn';
+                remove.type = 'button';
+                remove.textContent = '✕';
+                remove.title = 'Remove Computer';
+                remove.onclick = () => removeComputerName(index);
+                item.appendChild(label);
+                item.appendChild(remove);
+                list.appendChild(item);
+            });
+        }
+
+        async function addComputerName() {
+            const input = document.getElementById('newComputerName');
+            const name = input.value.trim();
+            if (!name) { input.focus(); return; }
+            if (computerNames.some(existing => existing.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+                alert('That computer name is already in the list.');
+                input.select();
+                return;
+            }
+            computerNames.push(name);
+            computerNames.sort((a, b) => a.localeCompare(b));
+            input.value = '';
+            renderManagedComputers();
+            populateAssetComputerDropdown();
+            populateSeatComputerDropdown();
+            await saveToStorage();
+            input.focus();
+        }
+
+        async function removeComputerName(index) {
+            const name = computerNames[index];
+            if (!name || !confirm('Remove "' + name + '" from the computer list? Existing asset records and seat assignments will not be changed.')) return;
+            computerNames.splice(index, 1);
+            renderManagedComputers();
+            populateAssetComputerDropdown();
+            populateSeatComputerDropdown();
+            await saveToStorage();
+        }
+
+        function openManageSoftware() {
+            renderManagedSoftware();
+            document.getElementById('newSoftwareName').value = '';
+            document.getElementById('newSoftwareSeats').value = '';
+            document.getElementById('manageSoftwareModal').style.display = 'flex';
+        }
+
+        function renderManagedSoftware() {
+            const list = document.getElementById('managedSoftwareList');
+            list.innerHTML = '';
+            if (!softwareCatalog.length) {
+                list.innerHTML = '<li class="seat-list-item" style="color:var(--text-sub);">No software yet. Add a software name and total available seats above.</li>';
+                return;
+            }
+            softwareCatalog.forEach((software, index) => {
+                const item = document.createElement('div');
+                item.className = 'seat-list-item';
+                const label = document.createElement('span');
+                label.className = 'seat-info';
+                label.textContent = software.name + ' (' + software.maxSeats + (software.maxSeats === 1 ? ' Seat)' : ' Seats)');
+                const remove = document.createElement('button');
+                remove.className = 'seat-remove-btn';
+                remove.type = 'button';
+                remove.textContent = '✕';
+                remove.title = 'Remove Software';
+                remove.onclick = () => removeSoftwareOption(index);
+                item.appendChild(label);
+                item.appendChild(remove);
+                list.appendChild(item);
+            });
+        }
+
+        async function addSoftwareOption() {
+            const nameInput = document.getElementById('newSoftwareName');
+            const seatsInput = document.getElementById('newSoftwareSeats');
+            const name = nameInput.value.trim();
+            const maxSeats = Number(seatsInput.value);
+            if (!name) { nameInput.focus(); return; }
+            if (softwareCatalog.some(item => item.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+                alert('That software name is already in the list.');
+                nameInput.select();
+                return;
+            }
+            if (seatsInput.value.trim() === '' || !Number.isInteger(maxSeats) || maxSeats < 0) {
+                alert('Enter a whole number of available seats (zero or greater).');
+                seatsInput.focus();
+                return;
+            }
+            const id = createSoftwareId(name);
+            if (softwareCatalog.some(item => item.id === id)) {
+                alert('That software name conflicts with an existing software identifier. Please use a more specific name.');
+                nameInput.select();
+                return;
+            }
+            softwareCatalog.push({ id, name, maxSeats });
+            softwareCatalog.sort((a, b) => a.name.localeCompare(b.name));
+            selectedSoftwareId = id;
+            nameInput.value = '';
+            seatsInput.value = '';
+            renderManagedSoftware();
+            initSoftwareDropdown();
+            syncExpenseSoftwareDropdown();
+            updateSeatUI();
+            await saveToStorage();
+            nameInput.focus();
+        }
+
+        async function removeSoftwareOption(index) {
+            const software = softwareCatalog[index];
+            if (!software || !confirm('Remove "' + software.name + '" from the software list? Existing expenses and saved seat assignments will not be deleted.')) return;
+            softwareCatalog.splice(index, 1);
+            if (selectedSoftwareId === software.id) selectedSoftwareId = softwareCatalog[0]?.id || '';
+            renderManagedSoftware();
+            initSoftwareDropdown();
+            syncExpenseSoftwareDropdown();
+            updateSeatUI();
+            await saveToStorage();
+        }
+
+        function syncExpenseSoftwareDropdown(currentSoftware = '') {
+            const selectEl = document.getElementById('expenseSoftware');
+            if (!selectEl) return;
+            const selectedValue = currentSoftware || selectEl.value;
+            selectEl.innerHTML = '<option value="" disabled>Select Software...</option>';
+            if (!softwareCatalog.length) {
+                selectEl.innerHTML = '<option value="" disabled selected>No software yet. Tap Manage Software &amp; Seats to add some</option>';
+                return;
+            }
+            softwareCatalog.forEach(software => {
+                const option = document.createElement('option');
+                option.value = software.name;
+                option.textContent = software.name;
+                selectEl.appendChild(option);
+            });
+            if (selectedValue && !Array.from(selectEl.options).some(option => option.value === selectedValue)) {
+                const existingOption = document.createElement('option');
+                existingOption.value = selectedValue;
+                existingOption.textContent = selectedValue;
+                selectEl.appendChild(existingOption);
+            }
+            selectEl.value = selectedValue || '';
+            if (!selectEl.value) selectEl.selectedIndex = 0;
+        }
+
+        function onExpenseSoftwareChange() {
+            const name = document.getElementById('expenseSoftware').value;
+            const software = softwareCatalog.find(item => item.name === name);
+            if (software) {
+                document.getElementById('expenseQuantity').value = software.maxSeats;
+                updateExpenseGrandTotal();
+            }
+        }
+
+        function populateAssetUserDropdown(currentSelectedUser = '') {
+            const selectEl = document.getElementById('inputUser');
+            selectEl.innerHTML = employeeNames.length
+                ? '<option value="" disabled selected>Select User...</option>'
+                : '<option value="" disabled selected>No names yet. Tap Manage Names to add some</option>';
+            
+            const usedUsersInAssets = database
+                .map(item => item.user)
+                .filter(u => u && u !== currentSelectedUser);
+
+            employeeNames.forEach(name => {
+                if (!usedUsersInAssets.includes(name)) {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    selectEl.appendChild(opt);
+                }
+            });
+
+            if (currentSelectedUser && !Array.from(selectEl.options).some(option => option.value === currentSelectedUser)) {
+                const existingOption = document.createElement('option');
+                existingOption.value = currentSelectedUser;
+                existingOption.textContent = currentSelectedUser;
+                selectEl.appendChild(existingOption);
+            }
+
+            if (currentSelectedUser) {
+                selectEl.value = currentSelectedUser;
+            } else {
+                selectEl.selectedIndex = 0;
+            }
+        }
+
+        function populateAssetComputerDropdown(currentSelectedComp = '') {
+            const selectEl = document.getElementById('inputCompNo');
+            selectEl.innerHTML = '<option value="" disabled selected>Select Computer...</option>';
+
+            const usedCompsInAssets = database
+                .map(item => item.compNo)
+                .filter(c => c && c !== currentSelectedComp);
+
+            if (!computerNames.length) {
+                selectEl.innerHTML = '<option value="" disabled selected>No names yet. Tap Manage Computers to add some</option>';
+            } else {
+                computerNames.forEach(comp => {
+                    if (!usedCompsInAssets.includes(comp)) {
+                        const opt = document.createElement('option');
+                        opt.value = comp;
+                        opt.textContent = comp;
+                        selectEl.appendChild(opt);
+                    }
+                });
+            }
+
+            if (currentSelectedComp) {
+                selectEl.value = currentSelectedComp;
+            } else {
+                selectEl.selectedIndex = 0;
+            }
+        }
+
+        function populateSeatUserDropdown() {
+            const selectEl = document.getElementById('seat-username');
+            selectEl.innerHTML = employeeNames.length
+                ? '<option value="" disabled selected>Select User...</option>'
+                : '<option value="" disabled selected>No names yet. Tap Manage Names to add some</option>';
+            
+            const assignments = getAssignmentsForCurrentSoftware();
+            const usedUsersInSeats = assignments.map(a => a.user);
+
+            employeeNames.forEach(name => {
+                if (!usedUsersInSeats.includes(name)) {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    selectEl.appendChild(opt);
+                }
+            });
+
+            selectEl.selectedIndex = 0;
+        }
+
+        function populateSeatComputerDropdown() {
+            const selectEl = document.getElementById('seat-computer');
+            selectEl.innerHTML = '<option value="" disabled selected>Select Computer...</option>';
+
+            const assignments = getAssignmentsForCurrentSoftware();
+            const usedCompsInSeats = assignments.map(a => a.computer);
+
+            if (!computerNames.length) {
+                selectEl.innerHTML = '<option value="" disabled selected>No names yet. Tap Manage Computers to add some</option>';
+            } else {
+                computerNames.forEach(comp => {
+                    if (!usedCompsInSeats.includes(comp)) {
+                        const opt = document.createElement('option');
+                        opt.value = comp;
+                        opt.textContent = comp;
+                        selectEl.appendChild(opt);
+                    }
+                });
+            }
+
+            selectEl.selectedIndex = 0;
+        }
+
+        function switchTab(tabName) {
+            const dashView = document.getElementById('dashboardView');
+            const seatView = document.getElementById('seatManagerView');
+
+            const expenseView = document.getElementById('expensesView');
+
+            const btnAssets = document.getElementById('tabAssets');
+            const btnSeats = document.getElementById('tabSeats');
+            const btnExpenses = document.getElementById('tabExpenses');
+
+            dashView.style.display = 'none';
+            seatView.style.display = 'none';
+            expenseView.style.display = 'none';
+
+            btnAssets.classList.remove('active');
+            btnSeats.classList.remove('active');
+            btnExpenses.classList.remove('active');
+
+            if (tabName === 'assets') {
+                dashView.style.display = 'block';
+                btnAssets.classList.add('active');
+            } else if (tabName === 'seats') {
+                seatView.style.display = 'block';
+                btnSeats.classList.add('active');
+                updateSeatUI();
+            } else if (tabName === 'expenses') {
+                expenseView.style.display = 'block';
+                btnExpenses.classList.add('active');
+                renderExpenses();
+            }
+        }
+
+        /* --- Seat Manager Scripting --- */
+        function initSoftwareDropdown() {
+            const selectEl = document.getElementById('seat-software-select');
+            if (!selectEl) return;
+            const previousValue = selectedSoftwareId || selectEl.value;
+            selectEl.innerHTML = '';
+            if (!softwareCatalog.length) {
+                selectEl.innerHTML = '<option value="" disabled selected>No software yet. Tap Manage Software &amp; Seats to add some</option>';
+                selectedSoftwareId = '';
+                return;
+            }
+            softwareCatalog.forEach(sw => {
+                const opt = document.createElement('option');
+                opt.value = sw.id;
+                opt.textContent = `${sw.name} (${sw.maxSeats} ${sw.maxSeats === 1 ? 'Seat' : 'Seats'})`;
+                selectEl.appendChild(opt);
+            });
+            const matchingIndex = Array.from(selectEl.options).findIndex(opt => opt.value === previousValue);
+            selectEl.selectedIndex = matchingIndex >= 0 ? matchingIndex : 0;
+            selectedSoftwareId = selectEl.value || '';
+        }
+
+        function onSoftwareChange() {
+            selectedSoftwareId = document.getElementById('seat-software-select').value;
+            document.getElementById('seat-message').innerText = '';
+            document.getElementById('seat-message').className = 'seat-message';
+            document.getElementById('seat-comments').value = '';
+            updateSeatUI();
+        }
+
+        function getCurrentSoftwareInfo() {
+            return softwareCatalog.find(sw => sw.id === selectedSoftwareId) || null;
+        }
+
+        function getAssignmentsForCurrentSoftware() {
+            const allAssignments = getAllSeatAssignmentsSafe();
+            return Array.isArray(allAssignments[selectedSoftwareId])
+                ? allAssignments[selectedSoftwareId]
+                : [];
+        }
+
+        function saveAssignmentsForCurrentSoftware(assignments) {
+            try {
+                const allAssignments = getAllSeatAssignmentsSafe();
+                allAssignments[selectedSoftwareId] = assignments;
+                localStorage.setItem('multiLicenseAssignments', JSON.stringify(allAssignments));
+                if (encryptionKey) saveEncryptedState().catch(console.error);
+            } catch (error) {
+                console.error(error);
+                alert('RITA Storage Warning\n\nThe seat assignment could not be saved.');
+            }
+        }
+
+        function updateSeatUI() {
+            const swInfo = getCurrentSoftwareInfo();
+            const assignments = getAssignmentsForCurrentSoftware();
+            const list = document.getElementById('assignment-list');
+            list.innerHTML = '';
+
+            if (!swInfo) {
+                document.getElementById('seats-left').innerText = '0';
+                document.getElementById('seats-max').innerText = '0';
+                document.getElementById('assigned-seats-title').innerText = 'Assigned Seats';
+                populateSeatUserDropdown();
+                populateSeatComputerDropdown();
+                list.innerHTML = '<div style="color:var(--text-sub); font-size:14px; text-align:center; padding:20px 0;">No software yet. Tap Manage Software &amp; Seats to add some.</div>';
+                return;
+            }
+
+            const seatsLeft = swInfo.maxSeats - assignments.length;
+            document.getElementById('seats-left').innerText = seatsLeft;
+            document.getElementById('seats-max').innerText = swInfo.maxSeats;
+
+            document.getElementById('assigned-seats-title').innerText = assignments.length > 0
+                ? `Assigned Seats for ${swInfo.name}`
+                : `Assigned Seats`;
+
+            populateSeatUserDropdown();
+            populateSeatComputerDropdown();
+            
+            if (assignments.length === 0) {
+                list.innerHTML = `<div style="color:var(--text-sub); font-size:14px; text-align:center; padding: 20px 0;">No active seat licenses assigned for ${escapeHtml(swInfo.name)}.</div>`;
+                return;
+            }
+
+            assignments.forEach((item, index) => {
+                const li = document.createElement('div');
+                li.className = 'seat-list-item';
+                
+                const commentHtml = item.comments ? `<div class="seat-comment">Comments: ${escapeHtml(item.comments)}</div>` : '';
+
+                li.innerHTML = `
+                    <div class="seat-info">
+                        <span><strong>${escapeHtml(item.user)}</strong> (${escapeHtml(item.computer)})</span>
+                        ${commentHtml}
+                    </div>
+                    <button class="seat-remove-btn" onclick="removeSeat(${index})" title="Remove Seat">✕</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function assignSeat() {
+            const user = document.getElementById('seat-username').value;
+            const computer = document.getElementById('seat-computer').value;
+            const comments = document.getElementById('seat-comments').value.trim();
+            const messageDiv = document.getElementById('seat-message');
+
+            const swInfo = getCurrentSoftwareInfo();
+            const assignments = getAssignmentsForCurrentSoftware();
+
+            messageDiv.className = 'seat-message';
+            messageDiv.innerText = '';
+
+            if (!swInfo) {
+                messageDiv.className = 'seat-message error';
+                messageDiv.innerText = 'Please add a software option in Manage Software & Seats first.';
+                return;
+            }
+
+            if (!user || !computer) {
+                messageDiv.className = 'seat-message error';
+                messageDiv.innerText = 'Please select a user and a computer.';
+                return;
+            }
+
+            if (assignments.length >= swInfo.maxSeats) {
+                messageDiv.className = 'seat-message error';
+                messageDiv.innerText = `Error: No seats available! Limit of ${swInfo.maxSeats} reached.`;
+                return;
+            }
+
+            assignments.push({ user, computer, comments });
+            saveAssignmentsForCurrentSoftware(assignments);
+
+            document.getElementById('seat-comments').value = '';
+
+            messageDiv.className = 'seat-message success';
+            messageDiv.innerText = `License successfully assigned for ${swInfo.name}!`;
+            
+            updateSeatUI();
+        }
+
+        function removeSeat(index) {
+            const assignments = getAssignmentsForCurrentSoftware();
+            assignments.splice(index, 1);
+            saveAssignmentsForCurrentSoftware(assignments);
+            updateSeatUI();
+        }
+
+        function clearAllSeats() {
+            const swInfo = getCurrentSoftwareInfo();
+            if (confirm(`Are you sure you want to reset all allocated seats for ${swInfo.name}?`)) {
+                saveAssignmentsForCurrentSoftware([]);
+                document.getElementById('seat-message').innerText = '';
+                document.getElementById('seat-comments').value = '';
+                updateSeatUI();
+            }
+        }
+
+        /* --- Main Application Core Scripting --- */
+        function downloadFile(content, fileName, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function getPublicDatabase() {
+            return database.map(record => ({
+                ...record,
+                software: (record.software || []).map(sw => ({
+                    name: typeof sw === 'string' ? sw : (sw?.name || ''),
+                    user: typeof sw === 'string' ? '' : (sw?.user || ''),
+                    comments: typeof sw === 'string' ? '' : (sw?.comments || '')
+                }))
+            }));
+        }
+
+        function exportDatabase() {
+            const choice = prompt(
+                'Export RITA data:\n\n' +
+                '1 = JSON (no passwords)\n' +
+                '2 = CSV (no passwords)\n' +
+                '3 = TXT (no passwords)\n' +
+                '4 = Encrypted RITA Backup (JSON)\n' +
+                '5 = Restore Encrypted Backup\n\n' +
+                'Enter 1, 2, 3, 4, or 5:',
+                '2'
+            );
+
+            if (!choice) return;
+            const fmt = choice.trim().toLowerCase();
+
+            if (fmt === '5' || fmt === 'restore' || fmt === 'import') {
+                openRestorePicker();
+                return;
+            }
+
+            if (fmt === '4' || fmt === 'backup' || fmt === 'encrypted') {
+                exportEncryptedBackup();
+                return;
+            }
+
+            const publicDatabase = getPublicDatabase();
+
+            if (fmt === '1' || fmt === 'json') {
+                downloadFile(JSON.stringify(publicDatabase, null, 2),
+                    'RCMDO_IT_Assets_Export.json', 'application/json');
+                return;
+            }
+
+            if (fmt === '2' || fmt === 'csv') {
+                const headers = ['ID','Computer No.','User','Email','CPU','RAM','GPU','Storage','Displays','Software Provisions'];
+                const rows = publicDatabase.map(r => {
+                    const swList = (r.software || []).map((sw, i) => {
+                        if (!sw.name) return '';
+                        const u = sw.user ? ` (User: ${sw.user})` : '';
+                        const c = sw.comments ? ` (Comments: ${sw.comments})` : '';
+                        return `${i + 1}. ${sw.name}${u}${c}`;
+                    }).filter(Boolean).join(' | ');
+
+                    return [r.id,r.compNo,r.user,r.email,r.cpu,r.ram,r.gpu,r.storage,r.displays,swList]
+                        .map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',');
+                });
+
+                downloadFile([headers.join(','), ...rows].join('\n'),
+                    'RCMDO_IT_Assets_Export.csv', 'text/csv');
+                return;
+            }
+
+            if (fmt === '3' || fmt === 'txt' || fmt === 'text') {
+                let txt = 'RCMDO IT Assets - Hardware & Software Inventory\n';
+                txt += '================================================\n\n';
+
+                publicDatabase.forEach((r, idx) => {
+                    txt += `[Item #${idx + 1}]\n`;
+                    txt += `Computer No.: ${r.compNo || '—'}\n`;
+                    txt += `User: ${r.user || '—'}\n`;
+                    txt += `Email: ${r.email || '—'}\n`;
+                    txt += `CPU: ${r.cpu || '—'}\n`;
+                    txt += `RAM: ${r.ram || '—'}\n`;
+                    txt += `GPU: ${r.gpu || '—'}\n`;
+                    txt += `Storage: ${r.storage || '—'}\n`;
+                    txt += `Displays: ${r.displays || '—'}\n`;
+                    txt += 'Software Provisions:\n';
+
+                    if (r.software?.length) {
+                        r.software.forEach((sw, i) => {
+                            if (sw.name) {
+                                txt += `  ${i + 1}. ${sw.name}`;
+                                if (sw.user) txt += ` | User: ${sw.user}`;
+                                if (sw.comments) txt += ` | Comments: ${sw.comments}`;
+                                txt += '\n';
+                            }
+                        });
+                    } else {
+                        txt += '  None\n';
+                    }
+                    txt += '\n------------------------------------------------\n\n';
+                });
+
+                downloadFile(txt, 'RCMDO_IT_Assets_Export.txt', 'text/plain');
+                return;
+            }
+
+            alert('Invalid export selection.');
+        }
+
+        async function exportEncryptedBackup() {
+            if (!encryptionKey) {
+                alert('RITA is locked. Please reopen RITA and enter the master password.');
+                return;
+            }
+
+            try {
+                const state = {
+                    database: normalizeDatabase(database),
+                    seatAssignments: getAllSeatAssignmentsSafe(),
+                    expenses: normalizeExpenses(expenses),
+                    employeeNames: [...employeeNames],
+                    computerNames: [...computerNames],
+                    softwareCatalog: softwareCatalog.map(sw => ({ ...sw }))
+                };
+                const encrypted = await encryptObject(state, encryptionKey);
+
+                downloadFile(JSON.stringify(encrypted, null, 2),
+                    'RITA_Encrypted_Backup.json', 'application/json');
+            } catch (error) {
+                console.error(error);
+                alert('RITA could not create the encrypted backup.');
+            }
+        }
+
+        function openRestorePicker() {
+            const input = document.getElementById('restoreFileInput');
+            input.value = '';
+            input.click();
+        }
+
+        async function handleRestoreFile(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+
+            try {
+                if (!encryptionKey) throw new Error('RITA is locked.');
+
+                const imported = JSON.parse(await file.text());
+                const state = await decryptObject(imported, encryptionKey);
+
+                if (!state || !isValidDatabase(state.database)) {
+                    throw new Error('Invalid RITA backup database.');
+                }
+
+                const proceed = confirm(
+                    'Restore RITA Backup?\n\n' +
+                    'RITA will first create an automatic backup of your current database.\n\n' +
+                    'Then the selected backup will replace the current database.'
+                );
+                if (!proceed) return;
+
+                const currentEncrypted = localStorage.getItem(STORAGE_KEY);
+                if (currentEncrypted) localStorage.setItem(BACKUP_KEY, currentEncrypted);
+
+                database = normalizeDatabase(state.database);
+                expenses = normalizeExpenses(state.expenses || []);
+                employeeNames = Array.isArray(state.employeeNames)
+                    ? state.employeeNames.filter(name => typeof name === 'string').map(name => name.trim()).filter(Boolean)
+                    : [];
+                computerNames = Array.isArray(state.computerNames)
+                    ? state.computerNames.filter(name => typeof name === 'string').map(name => name.trim()).filter(Boolean)
+                    : [];
+                softwareCatalog = normalizeSoftwareCatalog(state.softwareCatalog || []);
+
+                if (state.seatAssignments) {
+                    localStorage.setItem(
+                        'multiLicenseAssignments',
+                        JSON.stringify(state.seatAssignments)
+                    );
+                }
+
+                if (await saveToStorage()) {
+                    renderDashboard();
+                    renderExpenses();
+                    initSoftwareDropdown();
+                    syncExpenseSoftwareDropdown();
+                    populateAssetComputerDropdown();
+                    updateSeatUI();
+                    alert('RITA backup restored successfully.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert(
+                    'RITA Restore Warning\n\n' +
+                    'The selected backup could not be restored.\n\n' +
+                    'Your current database has not been intentionally replaced.'
+                );
+            } finally {
+                event.target.value = '';
+            }
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(Number(value) || 0);
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expensesList');
+            const stats = document.getElementById('expensesStats');
+            const budgetYrVal = document.getElementById('budgetValYr');
+            const budgetMoVal = document.getElementById('budgetValMo');
+            if (!list || !stats || !budgetYrVal || !budgetMoVal) return;
+
+            list.innerHTML = '';
+
+            const sortedExpenses = [...expenses].sort((a, b) =>
+                String(a.software || '').localeCompare(String(b.software || ''), undefined, {
+                    sensitivity: 'base'
+                })
+            );
+
+            stats.innerText = `${expenses.length} ${expenses.length === 1 ? 'Software Entry' : 'Software Entries'}`;
+
+            if (sortedExpenses.length === 0) {
+                list.innerHTML = '<div class="expense-empty">No software expenses recorded. Use the green button or “+ Add Software” to add one.</div>';
+            } else {
+                sortedExpenses.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'expense-item';
+                    row.setAttribute('onclick', `openExpenseDetailModal('${item.id}')`);
+
+                    const grandTotalYr = Number(item.grandTotal) || 0;
+                    const grandTotalMo = grandTotalYr / 12;
+
+                    row.innerHTML = `
+                        <div>
+                            <div class="expense-item-header">Software</div>
+                            <div class="expense-item-value"><strong>${escapeHtml(item.software)}</strong></div>
+                        </div>
+                        <div>
+                            <div class="expense-item-header">Qty.</div>
+                            <div class="expense-item-value">${item.quantity}</div>
+                        </div>
+                        <div>
+                            <div class="expense-item-header">Cost / Seat</div>
+                            <div class="expense-item-value">${formatCurrency(item.costPerSeat)}</div>
+                        </div>
+                        <div>
+                            <div class="expense-item-header">Grand Total / Mo</div>
+                            <div class="expense-item-value">${formatCurrency(grandTotalMo)}</div>
+                        </div>
+                        <div>
+                            <div class="expense-item-header">Grand Total / Yr</div>
+                            <div class="expense-item-value expense-item-total">${formatCurrency(grandTotalYr)}</div>
+                        </div>
+                        <button class="expense-remove-btn" onclick="deleteExpense(event, '${item.id}')" title="Remove Expense">✕</button>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+
+            const totalBudgetYr = expenses.reduce((sum, item) => sum + (Number(item.grandTotal) || 0), 0);
+            const totalBudgetMo = totalBudgetYr / 12;
+
+            budgetMoVal.innerText = formatCurrency(totalBudgetMo);
+            budgetYrVal.innerText = formatCurrency(totalBudgetYr);
+        }
+
+        function openExpenseDetailModal(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (!expense) return;
+
+            const grandTotalYr = Number(expense.grandTotal) || 0;
+            const grandTotalMo = grandTotalYr / 12;
+
+            const container = document.getElementById('expenseDetailContainer');
+            container.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">Software</div>
+                    <div class="detail-value user-blue" style="font-size: 18px;">${escapeHtml(expense.software || '—')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Quantity</div>
+                    <div class="detail-value">${expense.quantity}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Cost per seat</div>
+                    <div class="detail-value">${formatCurrency(expense.costPerSeat)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Grand Total Per Software Suite / Mo</div>
+                    <div class="detail-value" style="color:#58c50c; font-weight:600;">${formatCurrency(grandTotalMo)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Grand Total Per Software Suite / Yr</div>
+                    <div class="detail-value" style="color:#3189eb; font-weight:700; font-size:18px;">${formatCurrency(grandTotalYr)}</div>
+                </div>
+            `;
+
+            document.getElementById('expenseDetailEditBtn').onclick = () => triggerEditFromExpenseDetail(expense);
+            document.getElementById('expenseDetailModal').style.display = 'flex';
+        }
+
+        function triggerEditFromExpenseDetail(expense) {
+            closeModal('expenseDetailModal');
+            document.getElementById('editingExpenseId').value = expense.id;
+            document.getElementById('expenseModalTitle').innerText = 'Edit Software Expense';
+
+            const selectEl = document.getElementById('expenseSoftware');
+            syncExpenseSoftwareDropdown(expense.software || '');
+            selectEl.value = expense.software || '';
+            if (selectEl.selectedIndex === -1) {
+                selectEl.selectedIndex = 0;
+            }
+
+            document.getElementById('expenseQuantity').value = expense.quantity;
+            document.getElementById('expenseCostPerSeat').value = expense.costPerSeat;
+            document.getElementById('expenseGrandTotal').value = expense.grandTotal;
+            document.getElementById('expenseGrandTotalMo').value = (expense.grandTotal / 12).toFixed(2);
+            document.getElementById('expense-message').innerText = '';
+            document.getElementById('expense-message').className = 'seat-message';
+
+            document.getElementById('expenseModal').style.display = 'flex';
+        }
+
+        function openExpenseModal() {
+            document.getElementById('editingExpenseId').value = '';
+            document.getElementById('expenseModalTitle').innerText = 'New Software Expense';
+            syncExpenseSoftwareDropdown();
+            document.getElementById('expenseSoftware').selectedIndex = 0;
+            document.getElementById('expenseQuantity').value = '';
+            document.getElementById('expenseCostPerSeat').value = '';
+            document.getElementById('expenseGrandTotal').value = '';
+            document.getElementById('expenseGrandTotalMo').value = '';
+            document.getElementById('expense-message').innerText = '';
+            document.getElementById('expense-message').className = 'seat-message';
+            document.getElementById('expenseModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('expenseSoftware').focus(), 100);
+        }
+
+        function updateExpenseGrandTotal() {
+            const quantity = Number(document.getElementById('expenseQuantity').value);
+            const costPerSeat = Number(document.getElementById('expenseCostPerSeat').value);
+
+            if (Number.isFinite(quantity) && Number.isFinite(costPerSeat) && quantity >= 0 && costPerSeat >= 0) {
+                const yearlyTotal = quantity * costPerSeat;
+                document.getElementById('expenseGrandTotal').value = yearlyTotal.toFixed(2);
+                document.getElementById('expenseGrandTotalMo').value = (yearlyTotal / 12).toFixed(2);
+            }
+        }
+
+        function updateExpenseMonthlyFromYearly() {
+            const yearlyTotal = Number(document.getElementById('expenseGrandTotal').value);
+            if (Number.isFinite(yearlyTotal) && yearlyTotal >= 0) {
+                document.getElementById('expenseGrandTotalMo').value = (yearlyTotal / 12).toFixed(2);
+            }
+        }
+
+        function saveExpenseForm() {
+            const editId = document.getElementById('editingExpenseId').value;
+            const software = document.getElementById('expenseSoftware').value;
+            const quantity = Number(document.getElementById('expenseQuantity').value);
+            const costPerSeat = Number(document.getElementById('expenseCostPerSeat').value);
+            const grandTotalInput = Number(document.getElementById('expenseGrandTotal').value);
+            const message = document.getElementById('expense-message');
+
+            message.innerText = '';
+            message.className = 'seat-message';
+
+            if (!software) {
+                message.className = 'seat-message error';
+                message.innerText = 'Please select a software.';
+                return;
+            }
+
+            if (!Number.isFinite(quantity) || quantity <= 0 || !Number.isInteger(quantity)) {
+                message.className = 'seat-message error';
+                message.innerText = 'Quantity must be a whole number greater than 0.';
+                return;
+            }
+
+            if (!Number.isFinite(costPerSeat) || costPerSeat < 0) {
+                message.className = 'seat-message error';
+                message.innerText = 'Please enter a valid cost per seat.';
+                return;
+            }
+
+            const calculatedTotal = quantity * costPerSeat;
+            const grandTotal = Number.isFinite(grandTotalInput) && grandTotalInput >= 0
+                ? grandTotalInput
+                : calculatedTotal;
+
+            const record = {
+                id: editId || (Date.now().toString() + Math.random().toString(36).slice(2)),
+                software,
+                quantity,
+                costPerSeat,
+                grandTotal
+            };
+
+            if (editId) {
+                const idx = expenses.findIndex(item => item.id === editId);
+                if (idx !== -1) expenses[idx] = record;
+            } else {
+                expenses.push(record);
+            }
+
+            saveToStorage().then(saved => {
+                if (saved) {
+                    renderExpenses();
+                    closeModal('expenseModal');
+                } else if (!editId) {
+                    expenses.pop();
+                }
+            });
+        }
+
+        function deleteExpense(e, id) {
+            e.stopPropagation();
+            const expense = expenses.find(item => item.id === id);
+            if (!expense) return;
+
+            if (confirm(`Remove "${expense.software}" from the software expenses list?`)) {
+                expenses = expenses.filter(item => item.id !== id);
+                saveToStorage().then(saved => {
+                    if (saved) renderExpenses();
+                });
+            }
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('cardsGrid');
+            const stats = document.getElementById('dbStats');
+            grid.innerHTML = '';
+
+            stats.innerText = `${database.length} ${database.length === 1 ? 'Record' : 'Records'} Stored`;
+
+            if (database.length === 0) {
+                grid.innerHTML = `<div class="empty-state">No items found. Tap the "+" button below to log your first machine asset.</div>`;
+                return;
+            }
+
+            const sortedDatabase = [...database].sort((a, b) =>
+                String(a.compNo || '').localeCompare(String(b.compNo || ''), undefined, {
+                    numeric: true,
+                    sensitivity: 'base'
+                })
+            );
+
+            sortedDatabase.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('onclick', `openDetailModal('${item.id}')`);
+
+                let swHtmlStack = '';
+                if (item.software && Array.isArray(item.software)) {
+                    item.software.forEach((sw) => {
+                        const swName = typeof sw === 'string' ? sw : (sw.name || '');
+                        if (swName.trim()) {
+                            swHtmlStack += `<div class="card-software-item">${escapeHtml(swName)}</div>`;
+                        }
+                    });
+                }
+
+                card.innerHTML = `
+                    <button class="delete-btn" onclick="deleteRecord(event, '${item.id}')">×</button>
+                    <div class="card-header">${escapeHtml(item.compNo || 'Blank ID')}</div>
+                    <div class="card-body">
+                        <div class="card-meta user-highlight">User: <span>${escapeHtml(item.user || '—')}</span></div>
+                        <div class="card-meta">Email: <span>${escapeHtml(item.email || '—')}</span></div>
+                        <div class="card-software-list">
+                            ${swHtmlStack}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openAddModal() {
+            document.getElementById('editingId').value = '';
+            document.getElementById('formModalTitle').innerText = 'New Entry';
+            
+            populateAssetComputerDropdown();
+            populateAssetUserDropdown();
+
+            document.getElementById('inputEmail').value = '';
+            for (let i = 1; i <= 10; i++) {
+                document.getElementById(`sw${i}`).value = '';
+                document.getElementById(`sw${i}User`).value = '';
+                document.getElementById(`sw${i}Pass`).value = '';
+                document.getElementById(`sw${i}Comments`).value = '';
+            }
+            document.getElementById('inputCPU').value = '';
+            document.getElementById('inputRAM').value = '';
+            document.getElementById('inputGPU').value = '';
+            document.getElementById('inputStorage').value = '';
+            document.getElementById('inputDisplays').value = '';
+            document.getElementById('formModal').style.display = 'flex';
+        }
+
+        function openDetailModal(id) {
+            const record = database.find(r => r.id === id);
+            if (!record) return;
+
+            let softwareRowsHtml = '';
+            if (record.software && Array.isArray(record.software)) {
+                record.software.forEach((sw, idx) => {
+                    const swName = typeof sw === 'string' ? sw : (sw.name || '');
+                    if (swName.trim()) {
+                        const swUser = typeof sw === 'string' ? '' : (sw.user || '');
+                        const swPass = typeof sw === 'string' ? '' : (sw.password || '');
+                        const swComments = typeof sw === 'string' ? '' : (sw.comments || '');
+                        softwareRowsHtml += `
+                            <div class="detail-software-row">
+                                <span class="software-num">#${idx + 1}</span> ${escapeHtml(swName)}
+                                ${swUser ? `<div class="detail-subvalue">User: ${escapeHtml(swUser)}</div>` : ''}
+                                ${swPass ? `<div class="detail-subvalue">Password: ${escapeHtml(swPass)}</div>` : ''}
+                                ${swComments ? `<div class="detail-subvalue">Comments: ${escapeHtml(swComments)}</div>` : ''}
+                            </div>`;
+                    }
+                });
+            }
+
+            if (!softwareRowsHtml) {
+                softwareRowsHtml = '<div style="color:var(--text-sub); font-size:14px; padding-top:4px;">No software items logged for this machine.</div>';
+            }
+
+            const hardwareRows = [
+                ['CPU', record.cpu],
+                ['RAM', record.ram],
+                ['GPU', record.gpu],
+                ['Storage', record.storage],
+                ['Displays', record.displays]
+            ].filter(([label, value]) => value && String(value).trim());
+
+            let hardwareHtml = hardwareRows.length
+                ? hardwareRows.map(([label, value]) => `
+                    <div class="detail-item">
+                        <div class="detail-label">${label}</div>
+                        <div class="detail-value">${escapeHtml(value)}</div>
+                    </div>`).join('')
+                : '';
+
+            const container = document.getElementById('detailContainer');
+            container.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">Computer No.</div>
+                    <div class="detail-value" style="font-weight: 700; font-size: 20px;">${escapeHtml(record.compNo || '—')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">User</div>
+                    <div class="detail-value user-blue">${escapeHtml(record.user || '—')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value" style="color: var(--text-main); font-weight:500;">${escapeHtml(record.email || '—')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Software Configurations</div>
+                    <div class="detail-software-list">
+                        ${softwareRowsHtml}
+                    </div>
+                </div>
+                ${hardwareHtml}
+            `;
+
+            document.getElementById('detailEditBtn').onclick = () => triggerEditFromDetail(record);
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function triggerEditFromDetail(record) {
+            closeModal('detailModal');
+            document.getElementById('editingId').value = record.id;
+            document.getElementById('formModalTitle').innerText = 'Edit Entry';
+            
+            populateAssetComputerDropdown(record.compNo || '');
+            populateAssetUserDropdown(record.user || '');
+
+            document.getElementById('inputEmail').value = record.email || '';
+
+            for (let i = 1; i <= 10; i++) {
+                const sw = record.software && record.software[i - 1];
+                document.getElementById(`sw${i}`).value = typeof sw === 'string' ? sw : (sw?.name || '');
+                document.getElementById(`sw${i}User`).value = typeof sw === 'string' ? '' : (sw?.user || '');
+                document.getElementById(`sw${i}Pass`).value = typeof sw === 'string' ? '' : (sw?.password || '');
+                document.getElementById(`sw${i}Comments`).value = typeof sw === 'string' ? '' : (sw?.comments || '');
+            }
+
+            document.getElementById('inputCPU').value = record.cpu || '';
+            document.getElementById('inputRAM').value = record.ram || '';
+            document.getElementById('inputGPU').value = record.gpu || '';
+            document.getElementById('inputStorage').value = record.storage || '';
+            document.getElementById('inputDisplays').value = record.displays || '';
+            document.getElementById('formModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function closeModalOnOuterClick(e, modalId) {
+            if (e.target.id === modalId) {
+                closeModal(modalId);
+            }
+        }
+
+        function saveRecordForm() {
+            const editId = document.getElementById('editingId').value;
+            const compNo = document.getElementById('inputCompNo').value;
+            const user = document.getElementById('inputUser').value;
+            const email = document.getElementById('inputEmail').value.trim();
+
+            if (!compNo) {
+                alert('Please select a Computer Number identifier.');
+                return;
+            }
+
+            const softwareArray = [];
+            for (let i = 1; i <= 10; i++) {
+                softwareArray.push({
+                    name: document.getElementById(`sw${i}`).value.trim(),
+                    user: document.getElementById(`sw${i}User`).value.trim(),
+                    password: document.getElementById(`sw${i}Pass`).value,
+                    comments: document.getElementById(`sw${i}Comments`).value.trim()
+                });
+            }
+
+            const cpu = document.getElementById('inputCPU').value.trim();
+            const ram = document.getElementById('inputRAM').value.trim();
+            const gpu = document.getElementById('inputGPU').value.trim();
+            const storage = document.getElementById('inputStorage').value.trim();
+            const displays = document.getElementById('inputDisplays').value.trim();
+
+            const duplicateComputer = database.find(r =>
+                r.compNo === compNo && r.id !== editId
+            );
+
+            if (duplicateComputer) {
+                const proceed = confirm(
+                    `Duplicate Computer Number\n\n` +
+                    `${compNo} is already assigned to ${duplicateComputer.user || 'another user'}.\n\n` +
+                    `Do you want to save this record anyway?`
+                );
+                if (!proceed) return;
+            }
+
+            const duplicateUser = user
+                ? database.find(r => r.user === user && r.id !== editId)
+                : null;
+
+            if (duplicateUser && !duplicateComputer) {
+                const proceed = confirm(
+                    `Duplicate User\n\n` +
+                    `${user} already has an asset record (${duplicateUser.compNo || 'no computer number'}).\n\n` +
+                    `Do you want to save this record anyway?`
+                );
+                if (!proceed) return;
+            }
+
+            const record = {
+                id: editId || Date.now().toString(),
+                compNo, user, email,
+                software: softwareArray,
+                cpu, ram, gpu, storage, displays
+            };
+
+            if (editId) {
+                const index = database.findIndex(r => r.id === editId);
+                if (index !== -1) database[index] = record;
+            } else {
+                database.push(record);
+            }
+
+            saveToStorage().then(saved => {
+                if (saved) closeModal('formModal');
+            });
+        }
+
+        function deleteRecord(e, id) {
+            e.stopPropagation(); 
+            if (confirm('Are you sure you want to remove this record asset?')) {
+                database = database.filter(r => r.id !== id);
+                saveToStorage();
+            }
+        }
+
+        /* --- SharePoint link (stored encrypted, never in the HTML) --- */
+        const SHAREPOINT_KEY = 'pwa_rita_sharepoint_link';
+        let sharePointLink = '';
+        let spLongPressTimer = null;
+        let spLongPressFired = false;
+
+        async function loadSharePointLink() {
+            sharePointLink = '';
+            const raw = localStorage.getItem(SHAREPOINT_KEY);
+            if (!raw || !encryptionKey) return;
+            try {
+                const data = await decryptObject(JSON.parse(raw), encryptionKey);
+                sharePointLink = String(data?.url || '');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function storeSharePointLink(url) {
+            try {
+                if (!url) {
+                    localStorage.removeItem(SHAREPOINT_KEY);
+                } else {
+                    const encrypted = await encryptObject({ url }, encryptionKey);
+                    localStorage.setItem(SHAREPOINT_KEY, JSON.stringify(encrypted));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('RITA could not save the SharePoint link.');
+            }
+        }
+
+        function isValidWebLink(value) {
+            try {
+                const u = new URL(value);
+                return u.protocol === 'https:' || u.protocol === 'http:';
+            } catch {
+                return false;
+            }
+        }
+
+        function promptForSharePointLink() {
+            const input = prompt('Paste your SharePoint link. RITA will store it encrypted on this device.');
+            if (input === null) return;
+            const url = input.trim();
+            if (!isValidWebLink(url)) {
+                alert('That does not look like a valid link.');
+                return;
+            }
+            sharePointLink = url;
+            window.open(url, '_blank');
+            storeSharePointLink(url);
+        }
+
+        function manageSharePointLink() {
+            const input = prompt(
+                'Edit the SharePoint link.\n\nLeave it empty and press OK to remove it. Cancel keeps it.',
+                sharePointLink
+            );
+            if (input === null) return;
+            const url = input.trim();
+            if (!url) {
+                if (confirm('Remove the saved SharePoint link?')) {
+                    sharePointLink = '';
+                    storeSharePointLink('');
+                }
+                return;
+            }
+            if (!isValidWebLink(url)) {
+                alert('That does not look like a valid link.');
+                return;
+            }
+            sharePointLink = url;
+            storeSharePointLink(url);
+        }
+
+        function onSharePointTap() {
+            if (spLongPressFired) { spLongPressFired = false; return; }
+            if (!encryptionKey) { alert('RITA is locked.'); return; }
+            if (!sharePointLink) { promptForSharePointLink(); return; }
+            window.open(sharePointLink, '_blank');
+        }
+
+        (function setupSharePointButton() {
+            const btn = document.getElementById('sharePointBtn');
+            if (!btn) return;
+            btn.style.webkitTouchCallout = 'none';
+            btn.style.userSelect = 'none';
+            btn.addEventListener('contextmenu', e => e.preventDefault());
+            btn.addEventListener('click', onSharePointTap);
+            btn.addEventListener('pointerdown', () => {
+                spLongPressFired = false;
+                clearTimeout(spLongPressTimer);
+                spLongPressTimer = setTimeout(() => {
+                    spLongPressFired = true;
+                    if (encryptionKey) manageSharePointLink();
+                }, 600);
+            });
+            ['pointerup', 'pointerleave', 'pointercancel'].forEach(evt =>
+                btn.addEventListener(evt, () => clearTimeout(spLongPressTimer))
+            );
+        })();
+
+        function toggleBackgroundColor() {
+            const tealEnabled = document.body.classList.toggle('theme-teal');
+            const button = document.getElementById('backgroundToggle');
+            button.textContent = tealEnabled ? '◑' : '◐';
+        }
+
+        function escapeHtml(text) {
+            if(!text) return '';
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>
