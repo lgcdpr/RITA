@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <!-- Opt into system dark mode -->
     <meta name="color-scheme" content="light dark">
-    <title>RITA 3.0.1 - RCMDO IT Assets</title>
+    <title>RITA 3.0.2 - RCMDO IT Assets</title>
     <!-- iOS PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2197,13 +2197,19 @@
                 '2 = CSV (no passwords)\n' +
                 '3 = TXT (no passwords)\n' +
                 '4 = Encrypted RITA Backup (JSON)\n' +
-                '5 = Restore Encrypted Backup\n\n' +
-                'Enter 1, 2, 3, 4, or 5:',
+                '5 = Restore Encrypted Backup\n' +
+                '6 = Change Master Password\n\n' +
+                'Enter 1, 2, 3, 4, 5, or 6:',
                 '2'
             );
 
             if (!choice) return;
             const fmt = choice.trim().toLowerCase();
+
+            if (fmt === '6' || fmt === 'password') {
+                changeMasterPassword();
+                return;
+            }
 
             if (fmt === '5' || fmt === 'restore' || fmt === 'import') {
                 openRestorePicker();
@@ -2278,6 +2284,101 @@
             }
 
             alert('Invalid export selection.');
+        }
+
+        async function changeMasterPassword() {
+            if (!encryptionKey) {
+                alert('RITA is locked. Please reopen RITA and enter the master password.');
+                return;
+            }
+
+            const rawCheck = localStorage.getItem(MASTER_KEY_CHECK);
+            if (!rawCheck) {
+                alert('No master password was found on this device.');
+                return;
+            }
+
+            try {
+                const currentPassword = prompt('Enter your CURRENT RITA Master Password:');
+                if (currentPassword === null) return;
+
+                try {
+                    const check = JSON.parse(rawCheck);
+                    const verifiedKey = await deriveEncryptionKey(currentPassword, base64ToBytes(check.salt));
+                    await decryptObject(check, verifiedKey);
+                } catch (error) {
+                    alert('Incorrect RITA Master Password.');
+                    return;
+                }
+
+                const newPassword = prompt('Enter your NEW RITA Master Password (at least 8 characters):');
+                if (newPassword === null) return;
+                if (newPassword.length < 8) {
+                    alert('Please use a master password with at least 8 characters.');
+                    return;
+                }
+                if (newPassword === currentPassword) {
+                    alert('The new password must be different from the current one.');
+                    return;
+                }
+
+                const confirmation = prompt('Confirm your NEW RITA Master Password:');
+                if (confirmation === null) return;
+                if (confirmation !== newPassword) {
+                    alert('The master passwords do not match. Nothing was changed.');
+                    return;
+                }
+
+                /* Prepare everything first; nothing is written until all of it succeeds. */
+                const newSalt = crypto.getRandomValues(new Uint8Array(16));
+                const newKey = await deriveEncryptionKey(newPassword, newSalt);
+                const newCheck = await encryptObject({ rita: 'RITA_MASTER_PASSWORD_OK' }, newKey, newSalt);
+
+                const itemKeys = [STORAGE_KEY, BACKUP_KEY];
+                if (typeof SHAREPOINT_KEY !== 'undefined') itemKeys.push(SHAREPOINT_KEY);
+
+                const oldValues = {};
+                const newValues = {};
+                for (const itemKey of itemKeys) {
+                    const raw = localStorage.getItem(itemKey);
+                    if (raw === null) continue;
+                    oldValues[itemKey] = raw;
+                    try {
+                        const data = await decryptObject(JSON.parse(raw), encryptionKey);
+                        newValues[itemKey] = JSON.stringify(await encryptObject(data, newKey));
+                    } catch (error) {
+                        if (itemKey === STORAGE_KEY) throw error;
+                        newValues[itemKey] = null; /* unreadable copy: drop it */
+                    }
+                }
+
+                try {
+                    Object.keys(newValues).forEach(itemKey => {
+                        if (newValues[itemKey] === null) localStorage.removeItem(itemKey);
+                        else localStorage.setItem(itemKey, newValues[itemKey]);
+                    });
+                    localStorage.setItem(MASTER_KEY_CHECK, JSON.stringify(newCheck));
+                } catch (writeError) {
+                    Object.keys(oldValues).forEach(itemKey => {
+                        try { localStorage.setItem(itemKey, oldValues[itemKey]); } catch (e) { console.error(e); }
+                    });
+                    try { localStorage.setItem(MASTER_KEY_CHECK, rawCheck); } catch (e) { console.error(e); }
+                    throw writeError;
+                }
+
+                encryptionKey = newKey;
+                alert(
+                    'RITA Master Password changed successfully.\n\n' +
+                    'Encrypted backup files made before today still need your OLD password. ' +
+                    'Please make a new encrypted backup now (export option 4).'
+                );
+            } catch (error) {
+                console.error(error);
+                alert(
+                    'RITA could not change the master password.\n\n' +
+                    'Your current password and data have not been changed.'
+                );
+            }
         }
 
         async function exportEncryptedBackup() {
